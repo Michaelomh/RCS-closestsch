@@ -1,14 +1,21 @@
+#imports
 from tkinter import *
 import re
+import csv
 
-#TODO: Add the schools into a list
-lista = []
+#TODO: Change this into school names
+schoolList = []
 fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
 
- dir retrieveSchool():
+def openFile(fileName):
+    with open(fileName) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            schoolList.append(row[0])
+        print(schoolList)
 
-
-
+for files in fileLoc:
+    openFile(files)
 
 class AutocompleteEntry(Entry):
     def __init__(self, lista, *args, **kwargs):
@@ -86,14 +93,3 @@ class AutocompleteEntry(Entry):
     def comparison(self):
         pattern = re.compile('.*' + self.var.get() + '.*')
         return [w for w in self.lista if re.match(pattern, w)]
-
-if __name__ == '__main__':
-    root = Tk()
-
-    entry = AutocompleteEntry(lista, root)
-    entry.grid(row=0, column=0)
-    Button(text='nothing').grid(row=1, column=0)
-    Button(text='nothing').grid(row=2, column=0)
-    Button(text='nothing').grid(row=3, column=0)
-
-    root.mainloop()

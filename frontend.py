@@ -1,17 +1,17 @@
 #imports
 from tkinter import *
+from autocomplete import *
 
 #tk initalizer
 window=Tk()
 window.wm_title("Closest School Finder")
 
 #selecting school to search for
-#TODO: AutoComplete
 l1 = Label(window, text="Selected School")
 l1.grid(row=0,column=0)
 
-e1_val = StringVar()
-e1=Entry(window, textvariable=e1_val, width=50)
+#e1_val = StringVar()
+e1 = AutocompleteEntry(schoolList, window, width=50)
 e1.grid(row=0,column=1,columnspan=3, pady=5, padx=5)
 
 #Buttons to change the value in the list box.
