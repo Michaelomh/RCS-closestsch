@@ -3,6 +3,16 @@ from tkinter import *
 from autocomplete import *
 from backend import *
 
+#There is a need to if empty then do nothing.
+def getid(event):
+    global selected
+    index=lb1.curselection()
+    print(len(index))
+    selected = lb1.get(index[0])
+    #selected1 = lb1.get(index[1])
+    print(selected)
+    #print(selected1)
+
 #tk initalizer
 window=Tk()
 window.wm_title("Closest School Finder")
@@ -34,7 +44,7 @@ b4.grid(row=1,column=3, padx=5, pady=5)
 listbox_label = Label(window, text="North Zone Schools")
 listbox_label.grid(row=2,column=0, columnspan=2, sticky= "W",padx=5)
 
-lb1 = Listbox(window, height=8,width=68)
+lb1 = Listbox(window, height=8,width=68, selectmode=MULTIPLE)
 lb1.grid(row=3, column=0, rowspan=6, columnspan=4)
 #lb1.bind("<<ListboxSelect>>",getid)
 

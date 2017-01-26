@@ -1,10 +1,7 @@
 from nominatim import Nominatim
 import csv
 
-schoolList = []
-coordList = []
 nom = Nominatim()
-coord = True
 fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
 
 #give 2 params and return if that location is in singapore or not.

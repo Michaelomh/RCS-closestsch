@@ -1,99 +1,81 @@
-from tkinter import *
-import re
+from nominatim import Nominatim
+import csv
 
-#TODO: Add the schools into a list
-lista = []
-fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
+nom = Nominatim()
 
- dir retrieveSchool():
+#fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
+fileLoc = ["data/east.csv"]
 
+def validCoord(lat, lon):
+    if (1.2 < lat < 1.5) and (103 < lon < 104):
+        return True
+    else:
+        return False
 
+def checkMap(query):
+    #check school and long lat if either one is wrong check address, if either one is wrong, check postal code
+    nomObj = nom.query(query)
+    if len(nomObj) > 0 and validCoord(float(nomObj[0].get("lat")), float(nomObj[0].get("lon"))) :
+        return True
+    else :
+        return False
 
-
-class AutocompleteEntry(Entry):
-    def __init__(self, lista, *args, **kwargs):
-
-        Entry.__init__(self, *args, **kwargs)
-        self.lista = lista
-        self.var = self["textvariable"]
-        if self.var == '':
-            self.var = self["textvariable"] = StringVar()
-
-        self.var.trace('w', self.changed)
-        self.bind("<Right>", self.selection)
-        self.bind("<Up>", self.up)
-        self.bind("<Down>", self.down)
-
-        self.lb_up = False
-
-    def changed(self, name, index, mode):
-
-        if self.var.get() == '':
-            self.lb.destroy()
-            self.lb_up = False
-        else:
-            words = self.comparison()
-            if words:
-                if not self.lb_up:
-                    self.lb = Listbox()
-                    self.lb.bind("<Double-Button-1>", self.selection)
-                    self.lb.bind("<Right>", self.selection)
-                    self.lb.place(x=self.winfo_x(), y=self.winfo_y()+self.winfo_height())
-                    self.lb_up = True
-
-                self.lb.delete(0, END)
-                for w in words:
-                    self.lb.insert(END,w)
+def openFile(fileName):
+    with open(fileName) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            #print(row[0] + ", " + row[2] + ", " + row[3])
+            #if not row 0, then row 2, then row 3, if not error
+            if checkMap(row[0]):
+                nomObj = nom.query(row[0])
+                lat = nomObj[0].get("lat")
+                lon = nomObj[0].get("lon")
+                latList.append(lat)
+                lonList.append(lon)
+                schoolList.append(row[0])
+                zoneList.append(row[1])
+                addressList.append(row[2])
+                postList.append(row[3])
+                print([row[0], lat, lon , 1])
+            elif checkMap(row[2]):
+                nomObj = nom.query(row[2])
+                lat = nomObj[0].get("lat")
+                lon = nomObj[0].get("lon")
+                latList.append(lat)
+                lonList.append(lon)
+                schoolList.append(row[0])
+                zoneList.append(row[1])
+                addressList.append(row[2])
+                postList.append(row[3])
+                print([row[0], lat, lon , 2])
+            elif checkMap(row[3]):
+                nomObj = nom.query(row[3])
+                lat = nomObj[0].get("lat")
+                lon = nomObj[0].get("lon")
+                latList.append(lat)
+                lonList.append(lon)
+                schoolList.append(row[0])
+                zoneList.append(row[1])
+                addressList.append(row[2])
+                postList.append(row[3])
+                print([row[0], lat, lon, 3])
             else:
-                if self.lb_up:
-                    self.lb.destroy()
-                    self.lb_up = False
+                print([row[0], "SERIOUS ERROR"])
 
-    def selection(self, event):
+def writeFiles(fileName, schoolList, zoneList, addressList, postList, latList, lonList):
+    with open(fileName, 'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+        index = 0
+        while index < len(schoolList):
+            writer.writerow([schoolList[index], zoneList[index], addressList[index], postList[index], latList[index], lonList[index]])
+            index+= 1
 
-        if self.lb_up:
-            self.var.set(self.lb.get(ACTIVE))
-            self.lb.destroy()
-            self.lb_up = False
-            self.icursor(END)
-
-    def up(self, event):
-
-        if self.lb_up:
-            if self.lb.curselection() == ():
-                index = '0'
-            else:
-                index = self.lb.curselection()[0]
-            if index != '0':
-                self.lb.selection_clear(first=index)
-                index = str(int(index)-1)
-                self.lb.selection_set(first=index)
-                self.lb.activate(index)
-
-    def down(self, event):
-
-        if self.lb_up:
-            if self.lb.curselection() == ():
-                index = '0'
-            else:
-                index = self.lb.curselection()[0]
-            if index != END:
-                self.lb.selection_clear(first=index)
-                index = str(int(index)+1)
-                self.lb.selection_set(first=index)
-                self.lb.activate(index)
-
-    def comparison(self):
-        pattern = re.compile('.*' + self.var.get() + '.*')
-        return [w for w in self.lista if re.match(pattern, w)]
-
-if __name__ == '__main__':
-    root = Tk()
-
-    entry = AutocompleteEntry(lista, root)
-    entry.grid(row=0, column=0)
-    Button(text='nothing').grid(row=1, column=0)
-    Button(text='nothing').grid(row=2, column=0)
-    Button(text='nothing').grid(row=3, column=0)
-
-    root.mainloop()
+for files in fileLoc:
+    latList = []
+    lonList = []
+    schoolList = []
+    zoneList = []
+    addressList = []
+    postList = []
+    openFile(files)
+    writeFiles(files,schoolList, zoneList, addressList, postList, latList, lonList)
