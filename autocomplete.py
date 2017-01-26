@@ -2,9 +2,11 @@
 from tkinter import *
 import re
 import csv
+import time
 
 #TODO: Change this into school names
-schoolList = []
+#figure out how to deal with the not putting of schools into the form field
+schoolList = ['action']
 fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
 
 def openFile(fileName):
@@ -12,16 +14,16 @@ def openFile(fileName):
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
             schoolList.append(row[0])
-        print(schoolList)
+    #print(schoolList)
 
 for files in fileLoc:
     openFile(files)
 
 class AutocompleteEntry(Entry):
-    def __init__(self, lista, *args, **kwargs):
+    def __init__(self, schoolList, *args, **kwargs):
 
         Entry.__init__(self, *args, **kwargs)
-        self.lista = lista
+        self.schoolList = schoolList
         self.var = self["textvariable"]
         if self.var == '':
             self.var = self["textvariable"] = StringVar()
@@ -92,4 +94,4 @@ class AutocompleteEntry(Entry):
 
     def comparison(self):
         pattern = re.compile('.*' + self.var.get() + '.*')
-        return [w for w in self.lista if re.match(pattern, w)]
+        return [w for w in self.schoolList if re.match(pattern, w)]
