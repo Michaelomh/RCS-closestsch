@@ -4,6 +4,8 @@ from nominatim import Nominatim
 
 nom = Nominatim()
 
+schoolsToAdd = []
+
 #retrieve all of the schools by selection, and their long, lat.
 def north_schools():
     global SELECTEDZONE
@@ -41,15 +43,32 @@ def east_schools():
             for row in file:
                 lb1.insert(END,row[0])
 
+#reset list box to be empty.
 def resetListBox():
     lb1.delete(0, END)
 
+#reset list box to the correct school
+def repopulateSchools():
+    if (SELECTEDZONE == "north"):
+        north_schools()
+    elif (SELECTEDZONE == "south"):
+        south_schools()
+    elif (SELECTEDZONE == "west"):
+        west_schools()
+    elif (SELECTEDZONE == "east"):
+        east_schools()
+
+def resetListBox2():
+    lb1.after(500, repopulateSchools)
+
+#get the school name of the current selection
 def getid(event):
     global selected
     selected = lb1.get(lb1.curselection()[0])
     print(selected)
     getSchoolInfo(selected)
 
+#get all info based on school name and populate the entry boxes
 def getSchoolInfo (schoolName):
     #print(SELECTEDZONE)
     dataloc = "data/" + SELECTEDZONE + ".csv"
@@ -76,46 +95,51 @@ def getSchoolInfo (schoolName):
                     lat_entry.config(state=DISABLED)
                     lon_entry.config(state=DISABLED)
 
-def addCommand():
-    school = school_val.get()
-    address = address_val.get()
-    postal = postal_val.get()
-    print(school + ", " + address + ", " + postal)
-
-    #TODO: Checks the long and lat & Change the text in add
-    lat = validCoord(school, address, postal)[0]
-    lon = validCoord(school, address, postal)[1]
-
-    if lat == "0" or lon == "0":
-        #TODO: If false, notify using red boxes on the entry field
-        school_entry.config(fg='red')
-        address_entry.config(fg='red')
-        postal_entry.config(fg='red')
-    else :
-        #TODO: If true, add into csv, everything + long and lat, zone don't care
-        print(lat + ", " + lon)
-        #write into text entry
+#command to rewrite the full schools in the schoolsToAdd list
+def writeSchool():
+    with open("data/" + SELECTEDZONE + ".csv", 'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+        for school in schoolsToAdd:
+            writer.writerow(school)
+        #reset the lines
+        school_entry.delete(0,END)
+        address_entry.delete(0,END)
+        postal_entry.delete(0,END)
         lat_entry.config(state=NORMAL)
         lon_entry.config(state=NORMAL)
-        lat_entry.delete(0,END)
         lon_entry.delete(0,END)
-        lat_entry.insert(END,lat)
-        lon_entry.insert(END,lon)
-        lat_entry.config(state=DISABLED)
-        lon_entry.config(state=DISABLED)
+        lat_entry.delete(0,END)
 
-        #write into csv
-        print(SELECTEDZONE)
-        with open("data/" + SELECTEDZONE + ".csv", 'a') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
-            writer.writerow([school, SELECTEDZONE.upper() + " MANUAL", address , postal, lat, lon])
+#command to edit the new school information. Does not check the long and lat and use the previous long and lat
+def editSchool(school,zone,address,postal,lat,lon):
+    schoolsToAdd[:] = [] #empty the schoolsToAdd just in case
+    with open("data/" + SELECTEDZONE + ".csv") as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            if row[4] != lat:
+                schoolsToAdd.append([row[0],row[1],row[2],row[3],row[4],row[5]])
+            else:
+                schoolsToAdd.append([school,zone,address,postal,lat,lon])
+        writeSchool()
 
+#command to delete an entry in the row
+def deleteSchool(schoolName):
+    schoolsToAdd[:] = [] #empty the schoolsToAdd just in case
+    with open("data/" + SELECTEDZONE + ".csv") as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            if row[0] != schoolName:
+                schoolsToAdd.append([row[0],row[1],row[2],row[3],row[4],row[5]])
+        writeSchool()
+
+#checks if the lat and lon param is found within Singapore
 def validSingaporeCoord(lat, lon):
     if (1.2 < lat < 1.5) and (103 < lon < 104):
         return True
     else:
         return False
 
+#checks if the param is found within Singapore, used validSingaporeCoord method
 def checkMap(query):
     nomObj = nom.query(query)
     if len(nomObj) > 0 and validSingaporeCoord(float(nomObj[0].get("lat")), float(nomObj[0].get("lon"))) :
@@ -123,6 +147,7 @@ def checkMap(query):
     else :
         return False
 
+#checks if all params is found in singapore, used checkMap method
 def validCoord(school, address, postal):
     if checkMap(school):
         nomObj = nom.query(school)
@@ -142,8 +167,56 @@ def validCoord(school, address, postal):
     else:
         return["0","0"]
 
-#TODO: Delete command to delete the specified school_label
-#TODO: Edit Command to edit the details and check again before removing everything
+#main Commands
+def addCommand():
+    school = school_val.get()
+    address = address_val.get()
+    postal = postal_val.get()
+    print(school + ", " + address + ", " + postal)
+
+    #Checks the long and lat & Change the text in add
+    lat = validCoord(school, address, postal)[0]
+    lon = validCoord(school, address, postal)[1]
+
+    if lat == "0" or lon == "0":
+        #If false, notify using red boxes on the entry field
+        school_entry.config(fg='red')
+        address_entry.config(fg='red')
+        postal_entry.config(fg='red')
+    else :
+        #If true, add into csv, everything + long and lat, zone don't care
+        print(lat + ", " + lon)
+        #write into text entry
+        lat_entry.config(state=NORMAL)
+        lon_entry.config(state=NORMAL)
+        lat_entry.delete(0,END)
+        lon_entry.delete(0,END)
+        lat_entry.insert(END,lat)
+        lon_entry.insert(END,lon)
+        lat_entry.config(state=DISABLED)
+        lon_entry.config(state=DISABLED)
+
+        #write into csv
+        with open("data/" + SELECTEDZONE + ".csv", 'a') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+            writer.writerow([school, SELECTEDZONE.upper() + " MANUAL", address , postal, lat, lon])
+
+        #after finish writing, resetListBox
+        resetListBox2()
+
+def editCommand():
+    school = school_val.get()
+    address = address_val.get()
+    postal = postal_val.get()
+    lat = lat_val.get()
+    lon = lon_val.get()
+    editSchool(school,"zone",address,postal,lat,lon)
+    resetListBox2()
+
+def deleteCommand():
+    school = school_val.get()
+    deleteSchool(school)
+    resetListBox2()
 
 #tk initalizer
 window=Tk()
@@ -200,7 +273,7 @@ lon_label.grid(row=5,column=2, sticky= "E")
 
 lon_val = StringVar()
 lon_entry=Entry(window, textvariable=lon_val, width=16)
-lon_entry.grid(row=5,column=3, pady=5, padx=15)
+lon_entry.grid(row=5,column=3, pady=5, padx=5)
 
 #ListBox + Buttons
 lb1 = Listbox(window, height=8,width=50)
@@ -210,13 +283,13 @@ lb1.bind("<<ListboxSelect>>",getid)
 add_button=Button(window, text="Add", width=12, command=addCommand)
 add_button.grid(row=6,column=3, padx=5, pady=5)
 
-check_button=Button(window, text="Check", width=12)
-check_button.grid(row=9,column=3, padx=5, pady=5)
-
-edit_button=Button(window, text="Edit", width=12)
+edit_button=Button(window, text="Edit", width=12, command=editCommand)
 edit_button.grid(row=7,column=3, padx=5, pady=5)
 
-delete_button=Button(window, text="Delete", width=12)
+delete_button=Button(window, text="Delete", width=12, command=deleteCommand)
 delete_button.grid(row=8,column=3, padx=5, pady=5)
+
+check_button=Button(window, text="Close", width=12, command=window.destroy)
+check_button.grid(row=9,column=3, padx=5, pady=5)
 
 window.mainloop()
