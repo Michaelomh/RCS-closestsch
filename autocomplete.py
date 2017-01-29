@@ -6,7 +6,7 @@ import time
 
 #TODO: Change this into school names
 #figure out how to deal with the not putting of schools into the form field
-schoolList = ['action']
+schoolList = []
 fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
 
 def openFile(fileName):
@@ -14,29 +14,24 @@ def openFile(fileName):
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
             schoolList.append(row[0])
-    #print(schoolList)
 
 for files in fileLoc:
     openFile(files)
 
 class AutocompleteEntry(Entry):
     def __init__(self, schoolList, *args, **kwargs):
-
         Entry.__init__(self, *args, **kwargs)
         self.schoolList = schoolList
         self.var = self["textvariable"]
         if self.var == '':
             self.var = self["textvariable"] = StringVar()
-
         self.var.trace('w', self.changed)
         self.bind("<Right>", self.selection)
         self.bind("<Up>", self.up)
         self.bind("<Down>", self.down)
-
         self.lb_up = False
 
     def changed(self, name, index, mode):
-
         if self.var.get() == '':
             self.lb.destroy()
             self.lb_up = False
@@ -67,7 +62,6 @@ class AutocompleteEntry(Entry):
             self.icursor(END)
 
     def up(self, event):
-
         if self.lb_up:
             if self.lb.curselection() == ():
                 index = '0'

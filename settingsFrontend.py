@@ -74,26 +74,26 @@ def getSchoolInfo (schoolName):
     dataloc = "data/" + SELECTEDZONE + ".csv"
     #print(dataloc)
     with open(dataloc,"r") as file:
-            file = csv.reader(file, delimiter=',')
-            for row in file:
-                if(row[0] == schoolName) :
-                    #reset value
-                    lat_entry.config(state=NORMAL)
-                    lon_entry.config(state=NORMAL)
-                    school_entry.delete(0,END)
-                    address_entry.delete(0,END)
-                    postal_entry.delete(0,END)
-                    lat_entry.delete(0,END)
-                    lon_entry.delete(0,END)
+        file = csv.reader(file, delimiter=',')
+        for row in file:
+            if(row[0] == schoolName) :
+                #reset value
+                lat_entry.config(state=NORMAL)
+                lon_entry.config(state=NORMAL)
+                school_entry.delete(0,END)
+                address_entry.delete(0,END)
+                postal_entry.delete(0,END)
+                lat_entry.delete(0,END)
+                lon_entry.delete(0,END)
 
-                    #insert new value
-                    school_entry.insert(END,row[0])
-                    address_entry.insert(END,row[2])
-                    postal_entry.insert(END,row[3])
-                    lat_entry.insert(END,row[4])
-                    lon_entry.insert(END,row[5])
-                    lat_entry.config(state=DISABLED)
-                    lon_entry.config(state=DISABLED)
+                #insert new value
+                school_entry.insert(END,row[0])
+                address_entry.insert(END,row[2])
+                postal_entry.insert(END,row[3])
+                lat_entry.insert(END,row[4])
+                lon_entry.insert(END,row[5])
+                lat_entry.config(state=DISABLED)
+                lon_entry.config(state=DISABLED)
 
 #command to rewrite the full schools in the schoolsToAdd list
 def writeSchool():

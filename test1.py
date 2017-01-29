@@ -3,8 +3,8 @@ import csv
 
 nom = Nominatim()
 
-#fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
-fileLoc = ["data/east.csv"]
+fileLoc = ["data/east.csv", "data/north.csv", "data/south.csv", "data/west.csv"]
+#fileLoc = ["data/east.csv"]
 
 def validCoord(lat, lon):
     if (1.2 < lat < 1.5) and (103 < lon < 104):
