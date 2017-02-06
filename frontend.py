@@ -30,15 +30,11 @@ def retrieveSchoolCoords(schoolName) :
     return toReturn
 
 def closestSchoolLocator():
-    #TODO 1. Get the selected school - DONE
-    #TODO 2. Get the list of selected schools - DONE
-    #TODO 3. Get the distance from the selected school to all the schools. - DONE
-    #TODO 4. Return the minimum distance, the school and put to result page
     selectedSchool = e1.get()
     print("Selected School = ",e1.get())
     #get long, lat of the school, don't bother searching?
     selectedCoords = retrieveSchoolCoords(selectedSchool)
-    shortestDist = 99999
+    shortestDist = 99999 #big value so that the distance between 2 schools would always be shortest.
     bestSchool = "No Result Found"
     for schools in activeSchoolList:
         diffDist = vincenty(selectedCoords, retrieveSchoolCoords(schools))
